@@ -1,12 +1,17 @@
+using System;
+
 namespace HelloDotNet
 {
     public class Person
     {
+        public string input = string.Empty;
+
         public int anInteger = 1;
+        public long anLong;
         public double aNumber = 3.1415;
         public string aString = "foo";
         public bool aBoolean = true;
-        public byte[] aBuffer = new byte[10];
+        public byte[] aBuffer = new byte[4] { 0x1, 0x2, 0x3, 0x4 };
         public object[] anArray = new object[] { 1, "foo" };
         public object anObject = new { a = "foo", b = 12 };
     }
@@ -15,10 +20,13 @@ namespace HelloDotNet
     {
         public async Task<object> InvokeAsync(dynamic input)
         {
-            await Task.Delay(10);
-
-            var person = new Person();
-            return person;
+            var ticks = DateTime.UtcNow.Ticks;
+            var person = new Person()
+            {
+                input = input,
+                anLong = ticks,
+            };
+            return await Task.FromResult(person);
         }
     }
 }
