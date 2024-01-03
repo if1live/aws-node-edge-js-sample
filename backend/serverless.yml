@@ -1,0 +1,54 @@
+service: aws-node-edge-js-sample
+
+plugins:
+  - serverless-scriptable-plugin
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+
+  region: ap-northeast-1
+  stage: dev
+
+  memorySize: 512
+  architecture: arm64
+
+  logRetentionInDays: 1
+  versionFunctions: false
+  timeout: 5
+
+  apiGateway:
+    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000"
+
+    EDGE_USE_CORECLR: 1
+
+package:
+  individually: true
+  patterns:
+    - "!**"
+    - "!node_modules/**"
+
+functions:
+  http:
+    handler: artifact/handlers.dispatch
+    url: true
+    package:
+      patterns:
+        - artifact/handlers.mjs*
+        - static/blank.txt
+        - static/*.dll
+    events:
+      - httpApi:
+          method: ANY
+          path: /
+      - httpApi:
+          method: ANY
+          path: /{pathname+}
+
+custom:
+  scriptHooks:
+    before:package:createDeploymentArtifacts: pnpm artifact
